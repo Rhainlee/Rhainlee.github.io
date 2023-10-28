@@ -20,28 +20,38 @@
     var CONFIG = {"hostname":"halfbottle.xyz","root":"/","scheme":"Gemini","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
   </script>
 
-  <meta property="og:type" content="website">
+  <meta name="description" content="云桌面搭建方案之ssh端口转发一.前言192.168.1.13这一串数字相信大家都不会陌生，是一个常见的IPv4私有地址，或许你家里的路由器可能会给你的电脑分配这样的私有IP，私有IP只能在局域网的设备之间使用，如果想要访问互联网就必须使用公网IP，电脑在只有私有IP的情况下能够访问互联网，是因为有NAT地址转换技术的存在。如果你的路由器有公网IP（现在很难获取），就可以直接对路由器进行设置，做端">
+<meta property="og:type" content="article">
 <meta property="og:title" content="HalfBottle&#39;s Blog">
-<meta property="og:url" content="https://halfbottle.xyz/index.html">
+<meta property="og:url" content="https://halfbottle.xyz/2023/10/28/%E4%BA%91%E6%A1%8C%E9%9D%A2%E6%90%AD%E5%BB%BA/index.html">
 <meta property="og:site_name" content="HalfBottle&#39;s Blog">
+<meta property="og:description" content="云桌面搭建方案之ssh端口转发一.前言192.168.1.13这一串数字相信大家都不会陌生，是一个常见的IPv4私有地址，或许你家里的路由器可能会给你的电脑分配这样的私有IP，私有IP只能在局域网的设备之间使用，如果想要访问互联网就必须使用公网IP，电脑在只有私有IP的情况下能够访问互联网，是因为有NAT地址转换技术的存在。如果你的路由器有公网IP（现在很难获取），就可以直接对路由器进行设置，做端">
 <meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://rhainlee-imagebed.oss-cn-shanghai.aliyuncs.com/2023310img/image-20231022145054157.png">
+<meta property="og:image" content="https://rhainlee-imagebed.oss-cn-shanghai.aliyuncs.com/2023310img/image-20231022144336538.png">
+<meta property="og:image" content="https://rhainlee-imagebed.oss-cn-shanghai.aliyuncs.com/2023310img/image-20231022144911940.png">
+<meta property="og:image" content="https://rhainlee-imagebed.oss-cn-shanghai.aliyuncs.com/2023310img/image-20231022145934183.png">
+<meta property="og:image" content="https://rhainlee-imagebed.oss-cn-shanghai.aliyuncs.com/2023310img/image-20231022150806973.png">
+<meta property="article:published_time" content="2023-10-28T13:23:23.997Z">
+<meta property="article:modified_time" content="2023-10-28T13:21:59.086Z">
 <meta property="article:author" content="HalfBottle">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://rhainlee-imagebed.oss-cn-shanghai.aliyuncs.com/2023310img/image-20231022145054157.png">
 
-<link rel="canonical" href="https://halfbottle.xyz/">
+<link rel="canonical" href="https://halfbottle.xyz/2023/10/28/%E4%BA%91%E6%A1%8C%E9%9D%A2%E6%90%AD%E5%BB%BA/">
 
 
 <script id="page-configurations">
   // https://hexo.io/docs/variables.html
   CONFIG.page = {
     sidebar: "",
-    isHome : true,
-    isPost : false,
+    isHome : false,
+    isPost : true,
     lang   : 'zh-CN'
   };
 </script>
 
-  <title>HalfBottle's Blog</title>
+  <title> | HalfBottle's Blog</title>
   
 
 
@@ -158,9 +168,10 @@
         <div class="content-wrap">
           
 
-          <div class="content index posts-expand">
+          <div class="content post posts-expand">
             
-      
+
+    
   
   
   <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
@@ -176,10 +187,9 @@
       <meta itemprop="name" content="HalfBottle's Blog">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
+        <h1 class="post-title" itemprop="name headline">
           
-            <a href="/2023/10/28/%E4%BA%91%E6%A1%8C%E9%9D%A2%E6%90%AD%E5%BB%BA/" class="post-title-link" itemprop="url">未命名</a>
-        </h2>
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
@@ -203,7 +213,7 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="云桌面搭建方案之ssh端口转发"><a href="#云桌面搭建方案之ssh端口转发" class="headerlink" title="云桌面搭建方案之ssh端口转发"></a>云桌面搭建方案之ssh端口转发</h1><h2 id="一-前言"><a href="#一-前言" class="headerlink" title="一.前言"></a>一.前言</h2><p><code>192.168.1.13</code>这一串数字相信大家都不会陌生，是一个常见的IPv4私有地址，或许你家里的路由器可能会给你的电脑分配这样的私有IP，私有IP只能在局域网的设备之间使用，如果想要访问互联网就必须使用公网IP，电脑在只有私有IP的情况下能够访问互联网，是因为有<strong>NAT地址转换</strong>技术的存在。如果你的路由器有公网IP（现在很难获取），就可以直接对路由器进行设置，做端口转发来穿透路由器这层NAT，实现任意地点远程访问家中的网络设备。</p>
+        <h1 id="云桌面搭建方案之ssh端口转发"><a href="#云桌面搭建方案之ssh端口转发" class="headerlink" title="云桌面搭建方案之ssh端口转发"></a>云桌面搭建方案之ssh端口转发</h1><h2 id="一-前言"><a href="#一-前言" class="headerlink" title="一.前言"></a>一.前言</h2><p><code>192.168.1.13</code>这一串数字相信大家都不会陌生，是一个常见的IPv4私有地址，或许你家里的路由器可能会给你的电脑分配这样的私有IP，私有IP只能在局域网的设备之间使用，如果想要访问互联网就必须使用公网IP，电脑在只有私有IP的情况下能够访问互联网，是因为有<strong>NAT地址转换</strong>技术的存在。如果你的路由器有公网IP（现在很难获取），就可以直接对路由器进行设置，做端口转发来穿透路由器这层NAT，实现任意地点远程访问家中的网络设备。</p>
 <p>但实际上你家中的路由器通过PPPoE拨号获取到的IP地址很有可能是运营商分配的私有IP，也就是运营商那边还有一层NAT，路由器的数据发送给运营商还是会被进行NAT处理，这才是大部分家庭真正的网络环境，处在运营商的大内网环境中。这种情况下想要<strong>实现任意地点远程访问家中的网络设备</strong>，<strong>单靠设置路由器的NAT穿透是无法解决的，因为很难穿透运营商的NAT，必须借助其他有公网IP的服务器做内网穿透，这就是NAT技术带来的问题</strong>。</p>
 <p>市面上的远程桌面控制软件大概做的事情就如上面所言，但根据个人使用经验，稳定的不免费，免费的不稳定（哪怕是很受欢迎的zerotier+moon的方案，个人尝试的效果也不理想）。<strong>如果你喜欢折腾，本文提供另一种非常不错的远程桌面连接的方案的实践总结，下面就开始吧。</strong></p>
 <h2 id="二-前提"><a href="#二-前提" class="headerlink" title="二.前提"></a>二.前提</h2><p>这个方案有两个前提：</p>
@@ -287,186 +297,30 @@
 <li><a target="_blank" rel="noopener" href="https://www.anyviewer.cn/how-to/what-is-rdp-666.html">RDP是什么</a></li>
 </ul>
 
-      
     </div>
 
     
     
     
+
       <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://halfbottle.xyz/2023/10/21/helloBlog/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="HalfBottle">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="HalfBottle's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/10/21/helloBlog/" class="post-title-link" itemprop="url">Hello Blog</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-              
-
-              <time title="创建时间：2023-10-21 19:43:00 / 修改时间：19:43:52" itemprop="dateCreated datePublished" datetime="2023-10-21T19:43:00+08:00">2023-10-21</time>
-            </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/%E6%97%A5%E5%BF%97%E9%9A%8F%E7%AC%94/" itemprop="url" rel="index"><span itemprop="name">日志随笔</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <center>
-    <img src="https://images.pexels.com/photos/954599/pexels-photo-954599.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
-         width="100%"
-         height=425 >
-</center>
-
-<p>昨天到今天一共花了差不多两天的时间搭好了自己的博客，迫不及待地来写自己的第一篇博客！</p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2023/10/21/helloBlog/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
-    </div>
 
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
-      </footer>
-  </article>
-  
-  
-  
 
-      
-  
-  
-  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://halfbottle.xyz/2023/10/20/%E6%B5%8B%E8%AF%95/">
-
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="image" content="/images/avatar.jpg">
-      <meta itemprop="name" content="HalfBottle">
-      <meta itemprop="description" content="">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="HalfBottle's Blog">
-    </span>
-      <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
-          
-            <a href="/2023/10/20/%E6%B5%8B%E8%AF%95/" class="post-title-link" itemprop="url">测试</a>
-        </h2>
-
-        <div class="post-meta">
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-calendar"></i>
-              </span>
-              <span class="post-meta-item-text">发表于</span>
-
-              <time title="创建时间：2023-10-20 20:24:28" itemprop="dateCreated datePublished" datetime="2023-10-20T20:24:28+08:00">2023-10-20</time>
-            </span>
-              <span class="post-meta-item">
-                <span class="post-meta-item-icon">
-                  <i class="far fa-calendar-check"></i>
-                </span>
-                <span class="post-meta-item-text">更新于</span>
-                <time title="修改时间：2023-10-21 19:45:21" itemprop="dateModified" datetime="2023-10-21T19:45:21+08:00">2023-10-21</time>
-              </span>
-            <span class="post-meta-item">
-              <span class="post-meta-item-icon">
-                <i class="far fa-folder"></i>
-              </span>
-              <span class="post-meta-item-text">分类于</span>
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/temp/" itemprop="url" rel="index"><span itemprop="name">temp</span></a>
-                </span>
-            </span>
-
-          
-
-        </div>
-      </header>
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-          <p>Welcome to <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a>! This is your very first post. Check <a target="_blank" rel="noopener" href="https://hexo.io/docs/">documentation</a> for more info. If you get any problems when using Hexo, you can find the answer in <a target="_blank" rel="noopener" href="https://hexo.io/docs/troubleshooting.html">troubleshooting</a> or you can ask me on <a target="_blank" rel="noopener" href="https://github.com/hexojs/hexo/issues">GitHub</a>.</p>
-<h2 id="Quick-Start"><a href="#Quick-Start" class="headerlink" title="Quick Start"></a>Quick Start</h2><h3 id="Create-a-new-post"><a href="#Create-a-new-post" class="headerlink" title="Create a new post"></a>Create a new post</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ hexo new <span class="string">&quot;My New Post&quot;</span></span><br></pre></td></tr></table></figure>
-
-<p>More info: <a target="_blank" rel="noopener" href="https://hexo.io/docs/writing.html">Writing</a></p>
-          <!--noindex-->
-            <div class="post-button">
-              <a class="btn" href="/2023/10/20/%E6%B5%8B%E8%AF%95/#more" rel="contents">
-                阅读全文 &raquo;
-              </a>
-            </div>
-          <!--/noindex-->
         
-      
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2023/10/21/helloBlog/" rel="prev" title="Hello Blog">
+      <i class="fa fa-chevron-left"></i> Hello Blog
+    </a></div>
+      <div class="post-nav-item"></div>
     </div>
-
-    
-    
-    
-      <footer class="post-footer">
-        <div class="post-eof"></div>
       </footer>
+    
   </article>
   
   
-  
-
-
   
 
 
@@ -519,6 +373,7 @@
 
       <!--noindex-->
       <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BA%91%E6%A1%8C%E9%9D%A2%E6%90%AD%E5%BB%BA%E6%96%B9%E6%A1%88%E4%B9%8Bssh%E7%AB%AF%E5%8F%A3%E8%BD%AC%E5%8F%91"><span class="nav-number">1.</span> <span class="nav-text">云桌面搭建方案之ssh端口转发</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%80-%E5%89%8D%E8%A8%80"><span class="nav-number">1.1.</span> <span class="nav-text">一.前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C-%E5%89%8D%E6%8F%90"><span class="nav-number">1.2.</span> <span class="nav-text">二.前提</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%89-%E5%85%B7%E4%BD%93%E6%93%8D%E4%BD%9C"><span class="nav-number">1.3.</span> <span class="nav-text">三.具体操作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%9B%9B-%E6%80%BB%E7%BB%93"><span class="nav-number">1.4.</span> <span class="nav-text">四.总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%8F%82%E8%80%83%E6%96%87%E7%8C%AE"><span class="nav-number">1.5.</span> <span class="nav-text">参考文献</span></a></li></ol></li></ol></div>
       </div>
       <!--/noindex-->
 
