@@ -121,12 +121,12 @@
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">1</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>标签<span class="badge">3</span></a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">2</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类<span class="badge">3</span></a>
 
   </li>
         <li class="menu-item menu-item-archives">
@@ -178,7 +178,7 @@
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
           
-            <a href="/2023/10/28/%E4%BA%91%E6%A1%8C%E9%9D%A2%E6%90%AD%E5%BB%BA/" class="post-title-link" itemprop="url">未命名</a>
+            <a href="/2023/10/28/%E4%BA%91%E6%A1%8C%E9%9D%A2%E6%90%AD%E5%BB%BA/" class="post-title-link" itemprop="url">云桌面搭建方案之ssh端口转发</a>
         </h2>
 
         <div class="post-meta">
@@ -189,7 +189,16 @@
               <span class="post-meta-item-text">发表于</span>
               
 
-              <time title="创建时间：2023-10-28 21:23:23 / 修改时间：21:21:59" itemprop="dateCreated datePublished" datetime="2023-10-28T21:23:23+08:00">2023-10-28</time>
+              <time title="创建时间：2023-10-28 21:23:23 / 修改时间：21:54:46" itemprop="dateCreated datePublished" datetime="2023-10-28T21:23:23+08:00">2023-10-28</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/%E5%B7%A5%E5%85%B7%E4%BD%BF%E7%94%A8/" itemprop="url" rel="index"><span itemprop="name">工具使用</span></a>
+                </span>
             </span>
 
           
@@ -203,90 +212,21 @@
     <div class="post-body" itemprop="articleBody">
 
       
-          <h1 id="云桌面搭建方案之ssh端口转发"><a href="#云桌面搭建方案之ssh端口转发" class="headerlink" title="云桌面搭建方案之ssh端口转发"></a>云桌面搭建方案之ssh端口转发</h1><h2 id="一-前言"><a href="#一-前言" class="headerlink" title="一.前言"></a>一.前言</h2><p><code>192.168.1.13</code>这一串数字相信大家都不会陌生，是一个常见的IPv4私有地址，或许你家里的路由器可能会给你的电脑分配这样的私有IP，私有IP只能在局域网的设备之间使用，如果想要访问互联网就必须使用公网IP，电脑在只有私有IP的情况下能够访问互联网，是因为有<strong>NAT地址转换</strong>技术的存在。如果你的路由器有公网IP（现在很难获取），就可以直接对路由器进行设置，做端口转发来穿透路由器这层NAT，实现任意地点远程访问家中的网络设备。</p>
-<p>但实际上你家中的路由器通过PPPoE拨号获取到的IP地址很有可能是运营商分配的私有IP，也就是运营商那边还有一层NAT，路由器的数据发送给运营商还是会被进行NAT处理，这才是大部分家庭真正的网络环境，处在运营商的大内网环境中。这种情况下想要<strong>实现任意地点远程访问家中的网络设备</strong>，<strong>单靠设置路由器的NAT穿透是无法解决的，因为很难穿透运营商的NAT，必须借助其他有公网IP的服务器做内网穿透，这就是NAT技术带来的问题</strong>。</p>
-<p>市面上的远程桌面控制软件大概做的事情就如上面所言，但根据个人使用经验，稳定的不免费，免费的不稳定（哪怕是很受欢迎的zerotier+moon的方案，个人尝试的效果也不理想）。<strong>如果你喜欢折腾，本文提供另一种非常不错的远程桌面连接的方案的实践总结，下面就开始吧。</strong></p>
-<h2 id="二-前提"><a href="#二-前提" class="headerlink" title="二.前提"></a>二.前提</h2><p>这个方案有两个前提：</p>
-<ul>
-<li>远程桌面连接中，被连接的电脑装有 <strong>win10&#x2F;11 专业版</strong>，好吧，如果你的电脑是家庭版，建议想办法换成专业版，不麻烦的。</li>
-<li>一台拥有公网IP的Linux云服务器，在各大云服务器平台都可以购买，入门级别即可，每个月可能10多块钱，甚至有机会白嫖。（恩，我就是白嫖怪）</li>
-</ul>
-<h2 id="三-具体操作"><a href="#三-具体操作" class="headerlink" title="三.具体操作"></a>三.具体操作</h2><blockquote>
-<p> 开始之前，为了方便说明，我们<strong>定义终端A远程连接电脑B，称A为连接设备，B为被连接电脑</strong>。</p>
-</blockquote>
-<p>步骤1：当A和B同处一个局域网下，实现A对B的远程控制</p>
-<p>首先电脑B需要启用远程桌面连接功能（软件使用微软的<strong>RDP协议</strong>），并记下<strong>B的电脑名称</strong>，如下图所示</p>
-<p><img src="https://rhainlee-imagebed.oss-cn-shanghai.aliyuncs.com/2023310img/image-20231022145054157.png" alt="image-20231022145054157"></p>
-<p>然后，打开电脑B的命令行，输入<code>ipconfig</code>获得B的私有IP地址</p>
-<p><img src="https://rhainlee-imagebed.oss-cn-shanghai.aliyuncs.com/2023310img/image-20231022144336538.png" alt="image-20231022144336538"></p>
-<p>最后，在连接设备A上安装<strong>支持RDP协议</strong>的远程桌面客户端，下面以win10系统为例（连接方不需要专业版），其他终端或系统请自行搜索。（比如平板、手机等）</p>
-<p>注：<strong>远程桌面协议</strong>（<a target="_blank" rel="noopener" href="https://www.anyviewer.cn/how-to/what-is-rdp-666.html">RDP</a>)是微软开发的Windows 内置远程访问工具，可以在客户端运行RDP连接到另一台运行RDP的服务器计算机，在客户端会生成一个RDP文件包含服务器的连接设置。客户端可以创建RDP文件快捷方式，这样就可以通过双击该文件轻松建立远程连接。</p>
-<p><img src="https://rhainlee-imagebed.oss-cn-shanghai.aliyuncs.com/2023310img/image-20231022144911940.png" alt="image-20231022144911940"></p>
-<p>如上图所示，在开始菜单搜索框中搜索“远程桌面连接”，打开客户端，计算机项填入B的私有IP地址，用户名项填入B的电脑名称。点击连接，可能会要求输入密码（填入电脑B的登录密码），即可实现在同一局域网下的A对B的远程控制。</p>
-<p>步骤2：借助云服务器做<strong>ssh远程端口转发</strong>，实现任意地点（不同局域网下）的远程桌面连接</p>
-<blockquote>
-<p>接下来可能会遇到一些麻烦，<strong>建议</strong>及时测试，及时定位问题</p>
-</blockquote>
-<ol>
-<li><p>设置云服务器，开放云服务器的对应端口</p>
-<p>以阿里云为例（其他厂商的云服务器设置大同小异）</p>
-<p>在网站控制台<strong>添加一条安全规则</strong>，开放TCP协议的3389号端口（因为RDP协议默认使用3389端口）</p>
-<p><img src="https://rhainlee-imagebed.oss-cn-shanghai.aliyuncs.com/2023310img/image-20231022145934183.png" alt="image-20231022145934183">注1：不需要重启云服务器，配置安全组规则开放端口是即时生效的</p>
-<p>注2：笔者关闭了云服务器系统centos7的防火墙（很多云服务器默认就是关闭系统防火墙，保留云服务器的安全组功能来管理端口开放)，如果你的系统防火墙是打开的，可能需要对其进行设置，这里不详细展开。</p>
-<p><strong>测试（Optional）</strong>：使用telnet工具测试服务器端口是否成功开放（请自行搜索）</p>
-</li>
-<li><p>配置云服务器上的sshd服务</p>
-<p>使用ssh终端（例如finalshell）登录你的云服务器，编辑<code>/etc/ssh/sshd_config</code>文件（需要root权限），把其中下面这两项去掉注释，值设置为yes</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">AllowTcpForwarding yes &lt;==是否允许转发TCP流量 </span><br><span class="line">GatewayPorts yes     &lt;==是否允许远程主机连接本地的转发端口 </span><br></pre></td></tr></table></figure>
+          <center>
+    <img src="https://images.wallpaperscraft.com/image/single/girl_grass_city_213102_1280x720.jpg"
+         width="100%"
+         height=425 >
+</center>
 
-<p><img src="https://rhainlee-imagebed.oss-cn-shanghai.aliyuncs.com/2023310img/image-20231022150806973.png" alt="image-20231022150806973"></p>
-<p>注1：使用vim编辑文件是折腾linux服务器的基础中的基础(比如，<a target="_blank" rel="noopener" href="https://zhuanlan.zhihu.com/p/120985792#:~:text=vim%E7%9A%84%E5%9F%BA%E6%9C%AC%E4%BD%BF%E7%94%A8%201%201.vim%E6%98%AF%E4%BB%80%E4%B9%88%EF%BC%9F%20vi%3A%20Visual%20Interface%20%E5%8F%AF%E8%A7%86%E5%8C%96%E6%8E%A5%E5%8F%A3%20vim%3A,%E6%89%93%E5%BC%80%E6%96%87%E4%BB%B6%EF%BC%8C%E5%AE%9A%E4%BD%8D%E8%87%B3%E6%9C%80%E5%90%8E%E4%B8%80%E8%A1%8C%E3%80%82%20vim%20%2B%2FPATTERN%20%3A%20%E6%89%93%E5%BC%80%E6%96%87%E4%BB%B6%EF%BC%8C%E5%AE%9A%E4%BD%8D%E8%87%B3%E7%AC%AC%E4%B8%80%E6%AC%A1%E8%A2%AB%20PATTERN%20%E5%8C%B9%E9%85%8D%E5%88%B0%E7%9A%84%E8%A1%8C%E7%9A%84%E8%A1%8C%E9%A6%96">vim的基本使用</a>)</p>
-<p>注2：如果对sshd_config配置文件感兴趣或有疑问，请自行搜索其作用（比如，<a target="_blank" rel="noopener" href="https://developer.aliyun.com/article/972993">SSH远程登陆配置sshd_config文件详解</a>）</p>
-<p>然后重启sshd服务使配置生效</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart sshd</span><br></pre></td></tr></table></figure>
-
-</li>
-<li><p>使用ssh进行远程端口转发</p>
-<p>打开被连接电脑B的命令行，输入以下格式的命令：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ssh -NfR &lt;服务器IP&gt;:&lt;服务器Port&gt;:&lt;本地IP&gt;:&lt;本地Port&gt; &lt;服务器用户名&gt;@&lt;服务器IP&gt;</span><br></pre></td></tr></table></figure>
-
-<p>其中：<code>&lt;服务器IP&gt;</code>填写云服务器的公网IP；<code>&lt;服务器Port&gt;</code>填写开放的端口，默认3389；<code>&lt;本地IP&gt;</code>填写localhost或电脑B的私有IP；<code>&lt;本地Port&gt;</code>填写为启用远程桌面的高级设置中指定的端口，默认3389；<code>&lt;服务器用户名&gt;</code>填写登录云服务器的用户名（比如root）。</p>
-<p>在连接设备A上，打开远程连接客户端，把之前填写的B的局域网IP替换为云服务器的公网IP，再次尝试连接，如果一切顺利，至此，<strong>已经成功实现了任意地点（不同局域网下）的远程桌面连接</strong></p>
-<p>注1：因为添加了-f参数将ssh放到后台执行，所以执行命令后是没有输出的，<code>-NfR</code>含义请参考<a target="_blank" rel="noopener" href="http://linux.51yip.com/search/ssh">ssh命令参数文档</a></p>
-<p>注2：**执行完命令后不要关闭命令行(如果关闭了命令行，SSH连接就会被切断！)**。</p>
-<p>注3：做到这里，如果不了解什么是ssh远程端口转发，可以结合上面做的事情，停下来想一想了。对于<code>ssh -R 主机B端口Y:主机C:主机C端口Z username@hostname</code>命令，<strong>可以简单理解为：将对B:Y的访问转变成对C:Z的访问</strong>，这也是ssh远程端口转发的一个典型应用场景：<strong>用于向公网暴露局域网的本地服务</strong></p>
-</li>
-</ol>
-<p>步骤3：解决由于SSH会话超时导致的远程连接失败问题</p>
-<ul>
-<li><p>问题描述：</p>
-<p>虽然此时已经远程连接成功，但实际使用过程中，一定会发现一个问题：如果断开A对于B的远程连接，一段时间后A尝试重新连接到B，就会失败，只有在被连接电脑B的命令行再执行一次远程端口转发命令才可以连接成功。</p>
-</li>
-<li><p>原因：</p>
-<p>原因在于<strong>SSH会话超时</strong>。SSH远程端口转发功能的实现是基于SSH连接的，客户端在执行端口转发命令的同时，实际上也执行了基本的连接命令。而SSH为了安全考虑，会每隔一段时间超检查C&#x2F;S通道是否有数据通过，如果没有数据。则自动断开连接。</p>
-</li>
-<li><p>解决方案：</p>
-<p>基于以上的分析，解决SSH会话超时的方案如下：</p>
-<p>a.修改云服务器<code>/etc/ssh/sshd_config</code>文件</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ClientAliveInterval 60</span><br><span class="line">ClientAliveCountMax 5</span><br></pre></td></tr></table></figure>
-
-<p>上述配置表示没有数据交互时，每隔60秒服务端主动给客户端发送一次”alive”消息；在未收到任何客户端回应前最多允许发送5个”alive”消息</p>
-<p>b.重新启动SSH服务</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl restart sshd</span><br></pre></td></tr></table></figure></li>
-</ul>
-<p>步骤4：自动化执行端口转发命令</p>
-<p>目前的方案中，当每次进行A远程连接到B之前，都需要电脑B在命令行执行端口转发命令并输入密码，且不能关闭命令行，以维持SSH连接。</p>
-<p>所以根据个人需要，提供以下优化思路（具体实现请自行探索）：1.使用ssh提供的密钥认证的方法来免密登录；2.将远程端口转发命令写成脚本，并设置为开机自启。</p>
-<h2 id="四-总结"><a href="#四-总结" class="headerlink" title="四.总结"></a>四.总结</h2><p>通过以上的实践，借助ssh远程端口转发技术，提供局域网内的电脑对外提供服务的一种解决方案；结合rdp远程桌面连接协议，实现任意地点的远程桌面控制，完成云桌面的搭建！</p>
-<p>本次实践只是实现远程连接的多种方案中的其中一种：SSH远程端口转发+RDP+具有公网IP的云服务器，<strong>这种方案在笔者实际的实践过程中，取得了令人满意的延迟和稳定性</strong>（不同环境和条件下获得的结果可能有所差异，比如云服务器的物理位置，带宽等因素）</p>
-<p>关于其他远程桌面连接的同样的优秀方案，这里不多做介绍。所以这篇文章的意义，也可能更多的建立在你拥有云服务器的前提下，能折腾的有趣的事情之一，当然除了用于实现远程连接，你还可以将云服务器用于部署自己的个人博客或网站，搭建云图床（配合云存储服务），搭建代理节点（有其他限制）等等，如果有时间，我可能会把对这些有趣的东西的折腾过程都写下来吧。</p>
-<p>希望这篇教程能帮到你。</p>
-<p><strong>有任何问题请联系我（<a href="mailto:&#108;&#x65;&#x65;&#x5f;&#x72;&#x75;&#x6e;&#x73;&#104;&#x65;&#x6e;&#x67;&#x40;&#x71;&#113;&#46;&#99;&#x6f;&#109;">&#108;&#x65;&#x65;&#x5f;&#x72;&#x75;&#x6e;&#x73;&#104;&#x65;&#x6e;&#x67;&#x40;&#x71;&#113;&#46;&#99;&#x6f;&#109;</a>），欢迎指正讨论！！！</strong></p>
-<h2 id="参考文献"><a href="#参考文献" class="headerlink" title="参考文献"></a>参考文献</h2><ul>
-<li><a target="_blank" rel="noopener" href="https://www.techtarget.com/searchsecurity/definition/Secure-Shell#:~:text=SSH%2C%20also%20known%20as%20Secure,computer%20over%20an%20unsecured%20network.">What is SSH</a></li>
-<li><a target="_blank" rel="noopener" href="https://www.anyviewer.cn/how-to/what-is-rdp-666.html">RDP是什么</a></li>
-</ul>
-
+<p>如果你想在任意地点使用各种电子设备（笔记本&#x2F;平板&#x2F;手机）访问宿舍的笔记本电脑或者家中的台式机，本文提供一种低延迟、高稳定性的远程桌面连接控制方案。</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/2023/10/28/%E4%BA%91%E6%A1%8C%E9%9D%A2%E6%90%AD%E5%BB%BA/#more" rel="contents">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -541,13 +481,13 @@
       <div class="site-state-item site-state-categories">
             <a href="/categories/">
           
-        <span class="site-state-item-count">2</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
             <a href="/tags/">
           
-        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-count">3</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
